@@ -1,16 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
 
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bankcmd "github.com/cosmos/cosmos-sdk/x/bank/client/cli"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -46,9 +50,25 @@ func main() {
 		Short: "Command line interface for interacting with appd",
 	}
 
+	encodingConfig := simapp.MakeEncodingConfig()
+	initClientCtx := client.Context{}.
+		WithJSONMarshaler(encodingConfig.Marshaler).
+		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
+		WithTxConfig(encodingConfig.TxConfig).
+		WithCodec(encodingConfig.Amino).
+		WithInput(os.Stdin).
+		WithAccountRetriever(types.NewAccountRetriever(encodingConfig.Marshaler)).
+		WithBroadcastMode(flags.BroadcastBlock).
+		WithHomeDir(simapp.DefaultNodeHome)
+
 	// Add --chain-id to persistent flags and mark it required
 	rootCmd.PersistentFlags().String(flags.FlagChainID, "", "Chain ID of tendermint node")
-	rootCmd.PersistentPreRunE = func(_ *cobra.Command, _ []string) error {
+	rootCmd.Context()
+	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, _ []string) error {
+		if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
+			return err
+		}
+
 		return initConfig(rootCmd)
 	}
 
@@ -67,7 +87,10 @@ func main() {
 	// Add flags and prefix all env exposed with AA
 	executor := cli.PrepareMainCmd(rootCmd, "AA", app.DefaultCLIHome)
 
-	err := executor.Execute()
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, client.ClientContextKey, &client.Context{})
+
+	err := executor.ExecuteContext(ctx)
 	if err != nil {
 		fmt.Printf("Failed executing CLI command: %s, exiting...\n", err)
 		os.Exit(1)
