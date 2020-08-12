@@ -2,6 +2,7 @@ package nameservice
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/cosmos/cosmos-sdk/simapp/x/nameservice/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,11 +13,11 @@ import (
 func NewHandler(keeper Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
 		switch msg := msg.(type) {
-		case MsgSetName:
+		case *MsgSetName:
 			return handleMsgSetName(ctx, keeper, msg)
-		case MsgBuyName:
+		case *MsgBuyName:
 			return handleMsgBuyName(ctx, keeper, msg)
-		case MsgDeleteName:
+		case *MsgDeleteName:
 			return handleMsgDeleteName(ctx, keeper, msg)
 		default:
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, fmt.Sprintf("Unrecognized nameservice Msg type: %v", msg.Type()))
@@ -25,7 +26,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 }
 
 // Handle a message to set name
-func handleMsgSetName(ctx sdk.Context, keeper Keeper, msg MsgSetName) (*sdk.Result, error) {
+func handleMsgSetName(ctx sdk.Context, keeper Keeper, msg *MsgSetName) (*sdk.Result, error) {
 	if !msg.Owner.Equals(keeper.GetOwner(ctx, msg.Name)) { // Checks if the the msg sender is the same as the current owner
 		return nil, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "Incorrect Owner") // If not, throw an error
 	}
@@ -34,11 +35,12 @@ func handleMsgSetName(ctx sdk.Context, keeper Keeper, msg MsgSetName) (*sdk.Resu
 }
 
 // Handle a message to buy name
-func handleMsgBuyName(ctx sdk.Context, keeper Keeper, msg MsgBuyName) (*sdk.Result, error) {
+func handleMsgBuyName(ctx sdk.Context, keeper Keeper, msg *MsgBuyName) (*sdk.Result, error) {
 	// Checks if the the bid price is greater than the price paid by the current owner
 	if keeper.GetPrice(ctx, msg.Name).IsAllGT(msg.Bid) {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrInsufficientFunds, "Bid not high enough") // If not, throw an error
 	}
+	log.Print("handleMsgBuyName() here 1")
 	if keeper.HasOwner(ctx, msg.Name) {
 		err := keeper.CoinKeeper.SendCoins(ctx, msg.Buyer, keeper.GetOwner(ctx, msg.Name), msg.Bid)
 		if err != nil {
@@ -50,14 +52,17 @@ func handleMsgBuyName(ctx sdk.Context, keeper Keeper, msg MsgBuyName) (*sdk.Resu
 			return nil, err
 		}
 	}
+	log.Print("handleMsgBuyName() here 2")
 	keeper.SetOwner(ctx, msg.Name, msg.Buyer)
+	log.Print("handleMsgBuyName() here 3")
 	keeper.SetPrice(ctx, msg.Name, msg.Bid)
+	log.Print("handleMsgBuyName() here 4")
 	return &sdk.Result{}, nil
 }
 
 // Handle a message to delete name
 // Handle a message to delete name
-func handleMsgDeleteName(ctx sdk.Context, keeper Keeper, msg MsgDeleteName) (*sdk.Result, error) {
+func handleMsgDeleteName(ctx sdk.Context, keeper Keeper, msg *MsgDeleteName) (*sdk.Result, error) {
 	if !keeper.IsNamePresent(ctx, msg.Name) {
 		return nil, sdkerrors.Wrap(types.ErrNameDoesNotExist, msg.Name)
 	}

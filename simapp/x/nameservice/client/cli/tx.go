@@ -1,7 +1,10 @@
 package cli
 
 import (
+	"log"
+
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/simapp/x/nameservice/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -28,7 +31,7 @@ func GetTxCmd(storeKey string) *cobra.Command {
 
 // GetCmdBuyName is the CLI command for sending a BuyName transaction
 func GetCmdBuyName() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "buy-name [name] [amount]",
 		Short: "bid for existing name or claim new name",
 		Args:  cobra.ExactArgs(2),
@@ -39,25 +42,30 @@ func GetCmdBuyName() *cobra.Command {
 				return err
 			}
 
+			name := args[0]
+
 			coins, err := sdk.ParseCoins(args[1])
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgBuyName(args[0], coins, clientCtx.GetFromAddress())
+			msg := types.NewMsgBuyName(name, coins, clientCtx.GetFromAddress())
 			err = msg.ValidateBasic()
 			if err != nil {
 				return err
 			}
-
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
 }
 
 // GetCmdSetName is the CLI command for sending a SetName transaction
 func GetCmdSetName() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "set-name [name] [value]",
 		Short: "set the value associated with a name that you own",
 		Args:  cobra.ExactArgs(2),
@@ -77,11 +85,16 @@ func GetCmdSetName() *cobra.Command {
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
 }
 
 // GetCmdDeleteName is the CLI command for sending a DeleteName transaction
 func GetCmdDeleteName() *cobra.Command {
-	return &cobra.Command{
+
+	cmd := &cobra.Command{
 		Use:   "delete-name [name]",
 		Short: "delete the name that you own along with it's associated fields",
 		Args:  cobra.ExactArgs(1),
@@ -98,7 +111,13 @@ func GetCmdDeleteName() *cobra.Command {
 				return err
 			}
 
+			log.Print("GetCmdDeleteName() here 1")
+
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
 }

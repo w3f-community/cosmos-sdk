@@ -1,18 +1,16 @@
 package types
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-// MsgSetName defines a SetName message
-type MsgSetName struct {
-	Name  string         `json:"name"`
-	Value string         `json:"value"`
-	Owner sdk.AccAddress `json:"owner"`
-}
+// // MsgSetName defines a SetName message
+// type MsgSetName struct {
+// 	Name  string         `json:"name"`
+// 	Value string         `json:"value"`
+// 	Owner sdk.AccAddress `json:"owner"`
+// }
 
 var _ sdk.Msg = &MsgSetName{}
 
@@ -52,24 +50,12 @@ func (msg MsgSetName) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Owner}
 }
 
-func (msg MsgSetName) Reset() {
-	msg.Name = ""
-	msg.Owner = sdk.AccAddress{}
-	msg.Value = ""
-}
-
-func (msg MsgSetName) String() string {
-	return fmt.Sprintf("Name: (%s), Owner: (%s), Value: (%s)", msg.Name, msg.Owner.String, msg.Value)
-}
-
-func (_ MsgSetName) ProtoMessage() {}
-
-// MsgBuyName defines the BuyName message
-type MsgBuyName struct {
-	Name  string         `json:"name"`
-	Bid   sdk.Coins      `json:"bid"`
-	Buyer sdk.AccAddress `json:"buyer"`
-}
+// // MsgBuyName defines the BuyName message
+// type MsgBuyName struct {
+// 	Name  string         `json:"name"`
+// 	Bid   sdk.Coins      `json:"bid"`
+// 	Buyer sdk.AccAddress `json:"buyer"`
+// }
 
 var _ sdk.Msg = &MsgBuyName{}
 
@@ -112,23 +98,11 @@ func (msg MsgBuyName) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Buyer}
 }
 
-func (msg MsgBuyName) Reset() {
-	msg.Name = ""
-	msg.Bid = sdk.Coins{}
-	msg.Buyer = sdk.AccAddress{}
-}
-
-func (msg MsgBuyName) String() string {
-	return fmt.Sprintf("Name: (%s), Bid: (%s), Buyer: (%s)", msg.Name, msg.Bid.String(), msg.Buyer.String())
-}
-
-func (_ MsgBuyName) ProtoMessage() {}
-
-// MsgDeleteName defines a DeleteName message
-type MsgDeleteName struct {
-	Name  string         `json:"name"`
-	Owner sdk.AccAddress `json:"owner"`
-}
+// // MsgDeleteName defines a DeleteName message
+// type MsgDeleteName struct {
+// 	Name  string         `json:"name"`
+// 	Owner sdk.AccAddress `json:"owner"`
+// }
 
 var _ sdk.Msg = &MsgDeleteName{}
 
@@ -166,14 +140,3 @@ func (msg MsgDeleteName) GetSignBytes() []byte {
 func (msg MsgDeleteName) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Owner}
 }
-
-func (msg MsgDeleteName) Reset() {
-	msg.Name = ""
-	msg.Owner = sdk.AccAddress{}
-}
-
-func (msg MsgDeleteName) String() string {
-	return fmt.Sprintf("Name: (%s), Owner: (%s)", msg.Name, msg.Owner.String())
-}
-
-func (_ MsgDeleteName) ProtoMessage() {}
