@@ -28,7 +28,6 @@ var (
 
 // app module Basics object
 type AppModuleBasic struct {
-	cdc codec.Marshaler
 }
 
 func (AppModuleBasic) Name() string {
@@ -60,7 +59,7 @@ func (AppModuleBasic) RegisterRESTRoutes(ctx client.Context, rtr *mux.Router) {
 
 // Get the root query command of this module
 func (app AppModuleBasic) GetQueryCmd() *cobra.Command {
-	return cli.GetQueryCmd(StoreKey, app.cdc)
+	return cli.GetQueryCmd(StoreKey)
 }
 
 // Get the root tx command of this module
@@ -86,9 +85,9 @@ func (am AppModule) RegisterQueryService(_ grpc.Server) {
 }
 
 // NewAppModule creates a new AppModule Object
-func NewAppModule(cdc codec.Marshaler, k keeper.Keeper, bankKeeper bank.Keeper) AppModule {
+func NewAppModule(k keeper.Keeper, bankKeeper bank.Keeper) AppModule {
 	return AppModule{
-		AppModuleBasic: AppModuleBasic{cdc: cdc},
+		AppModuleBasic: AppModuleBasic{},
 		keeper:         k,
 		bankKeeper:     bankKeeper,
 	}

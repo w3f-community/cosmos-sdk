@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/simapp/x/nameservice/types"
 	"github.com/spf13/cobra"
 )
 
-func GetQueryCmd(storeKey string, cdc codec.JSONMarshaler) *cobra.Command {
+func GetQueryCmd(storeKey string) *cobra.Command {
 	nameserviceQueryCmd := &cobra.Command{
 		Use:                        types.ModuleName,
 		Short:                      "Querying commands for the nameservice module",
@@ -18,17 +18,17 @@ func GetQueryCmd(storeKey string, cdc codec.JSONMarshaler) *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 	nameserviceQueryCmd.AddCommand(
-		GetCmdResolveName(storeKey, cdc),
-		GetCmdWhois(storeKey, cdc),
-		GetCmdNames(storeKey, cdc),
+		GetCmdResolveName(storeKey),
+		GetCmdWhois(storeKey),
+		GetCmdNames(storeKey),
 	)
 
 	return nameserviceQueryCmd
 }
 
 // GetCmdResolveName queries information about a name
-func GetCmdResolveName(queryRoute string, cdc codec.JSONMarshaler) *cobra.Command {
-	return &cobra.Command{
+func GetCmdResolveName(queryRoute string) *cobra.Command {
+	cmd := &cobra.Command{
 		Use:   "resolve [name]",
 		Short: "resolve name",
 		Args:  cobra.ExactArgs(1),
@@ -43,21 +43,22 @@ func GetCmdResolveName(queryRoute string, cdc codec.JSONMarshaler) *cobra.Comman
 
 			res, _, err := clientCtx.QueryWithData(fmt.Sprintf("custom/%s/resolve/%s", queryRoute, name), nil)
 			if err != nil {
-				fmt.Printf("could not resolve name - %s \n", name)
 				return nil
 			}
-
 			var out types.QueryResResolve
-
-			cdc.MustUnmarshalJSON(res, &out)
+			clientCtx.JSONMarshaler.MustUnmarshalJSON(res, &out)
 			return clientCtx.PrintOutput(out)
 		},
 	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
 }
 
 // GetCmdWhois queries information about a domain
-func GetCmdWhois(queryRoute string, cdc codec.JSONMarshaler) *cobra.Command {
-	return &cobra.Command{
+func GetCmdWhois(queryRoute string) *cobra.Command {
+	cmd := &cobra.Command{
 		Use:   "whois [name]",
 		Short: "Query whois info of name",
 		Args:  cobra.ExactArgs(1),
@@ -71,20 +72,23 @@ func GetCmdWhois(queryRoute string, cdc codec.JSONMarshaler) *cobra.Command {
 
 			res, _, err := clientCtx.QueryWithData(fmt.Sprintf("custom/%s/whois/%s", queryRoute, name), nil)
 			if err != nil {
-				fmt.Printf("could not resolve whois - %s \n", name)
 				return nil
 			}
 
 			var out types.Whois
-			cdc.MustUnmarshalJSON(res, &out)
+			clientCtx.JSONMarshaler.MustUnmarshalJSON(res, &out)
 			return clientCtx.PrintOutput(out)
 		},
 	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
 }
 
 // GetCmdNames queries a list of all names
-func GetCmdNames(queryRoute string, cdc codec.JSONMarshaler) *cobra.Command {
-	return &cobra.Command{
+func GetCmdNames(queryRoute string) *cobra.Command {
+	cmd := &cobra.Command{
 		Use:   "names",
 		Short: "names",
 		// Args:  cobra.ExactArgs(1),
@@ -97,13 +101,16 @@ func GetCmdNames(queryRoute string, cdc codec.JSONMarshaler) *cobra.Command {
 
 			res, _, err := clientCtx.QueryWithData(fmt.Sprintf("custom/%s/names", queryRoute), nil)
 			if err != nil {
-				fmt.Printf("could not get query names\n")
 				return nil
 			}
 
 			var out types.QueryResNames
-			cdc.MustUnmarshalJSON(res, &out)
+			clientCtx.JSONMarshaler.MustUnmarshalJSON(res, &out)
 			return clientCtx.PrintOutput(out)
 		},
 	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
 }

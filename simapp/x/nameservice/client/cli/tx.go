@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"log"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -110,8 +108,6 @@ func GetCmdDeleteName() *cobra.Command {
 			if err != nil {
 				return err
 			}
-
-			log.Print("GetCmdDeleteName() here 1")
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

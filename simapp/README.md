@@ -13,3 +13,9 @@ nscli query nameservice resolve jack.id
 
 # Try out a whois query against the name you just registered
 nscli query nameservice whois jack.id
+
+# Alice buys name from jack
+nscli tx nameservice buy-name jack.id 10nametoken --from alice --chain-id namechain
+
+# Alice decides to delete the name she just bought from jack
+nscli tx nameservice delete-name jack.id --from alice --chain-id namechain

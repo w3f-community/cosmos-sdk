@@ -328,7 +328,7 @@ func NewSimApp(
 		ibc.NewAppModule(app.IBCKeeper),
 		params.NewAppModule(app.ParamsKeeper),
 		// TODO: Add your module(s)
-		nameservice.NewAppModule(appCodec, app.nsKeeper, app.BankKeeper),
+		nameservice.NewAppModule(app.nsKeeper, app.BankKeeper),
 		transferModule,
 	)
 

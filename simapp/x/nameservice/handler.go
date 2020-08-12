@@ -2,7 +2,6 @@ package nameservice
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/cosmos/cosmos-sdk/simapp/x/nameservice/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -40,7 +39,6 @@ func handleMsgBuyName(ctx sdk.Context, keeper Keeper, msg *MsgBuyName) (*sdk.Res
 	if keeper.GetPrice(ctx, msg.Name).IsAllGT(msg.Bid) {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrInsufficientFunds, "Bid not high enough") // If not, throw an error
 	}
-	log.Print("handleMsgBuyName() here 1")
 	if keeper.HasOwner(ctx, msg.Name) {
 		err := keeper.CoinKeeper.SendCoins(ctx, msg.Buyer, keeper.GetOwner(ctx, msg.Name), msg.Bid)
 		if err != nil {
@@ -52,11 +50,9 @@ func handleMsgBuyName(ctx sdk.Context, keeper Keeper, msg *MsgBuyName) (*sdk.Res
 			return nil, err
 		}
 	}
-	log.Print("handleMsgBuyName() here 2")
+
 	keeper.SetOwner(ctx, msg.Name, msg.Buyer)
-	log.Print("handleMsgBuyName() here 3")
 	keeper.SetPrice(ctx, msg.Name, msg.Bid)
-	log.Print("handleMsgBuyName() here 4")
 	return &sdk.Result{}, nil
 }
 

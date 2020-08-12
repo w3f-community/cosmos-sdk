@@ -32,7 +32,7 @@ func main() {
 	cobra.EnableCommandSorting = false
 
 	// Instantiate the codec for the command line application
-	// appCodec, cdc := app.MakeCodecs()
+	//appCodec, cdc := app.MakeCodecs()
 
 	// Read in the configuration file for the sdk
 	config := sdk.GetConfig()
