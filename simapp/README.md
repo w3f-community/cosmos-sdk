@@ -1,3 +1,17 @@
+# Building Instractions
+
+```
+make proto-gen
+make build-simd
+./simapp/init.sh
+```
+
+# Start the cosmos node
+
+nsd start --with-tendermint=false --transport=grpc
+
+# Cosmos CLI commands
+
 # First check the accounts to ensure they have funds
 nscli query account $(nscli keys show jack -a)
 nscli query account $(nscli keys show alice -a)
