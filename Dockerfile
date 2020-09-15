@@ -1,20 +1,16 @@
-# Simple usage with a mounted data directory:
-# > docker build -t simapp .
-#
-# Server:
-# > docker run -it -p 26657:26657 -p 26656:26656 -v ~/.simapp:/root/.simapp simapp simd init test-chain
-# TODO: need to set validator in genesis so start runs
-# > docker run -it -p 26657:26657 -p 26656:26656 -v ~/.simapp:/root/.simapp simapp simd start
-#
-# Client: (Note the simapp binary always looks at ~/.simapp we can bind to different local storage)
-# > docker run -it -p 26657:26657 -p 26656:26656 -v ~/.simappcli:/root/.simapp simapp simd keys add foo
-# > docker run -it -p 26657:26657 -p 26656:26656 -v ~/.simappcli:/root/.simapp simapp simd keys list
-# TODO: demo connecting rest-server (or is this in server now?)
-FROM golang:alpine AS build-env
+FROM golang:alpine
 
 # Install minimum necessary dependencies,
-ENV PACKAGES curl make git libc-dev bash gcc linux-headers eudev-dev python3
+ENV PACKAGES curl make git libc-dev bash gcc linux-headers eudev-dev python3 protoc protobuf ca-certificates
 RUN apk add --no-cache $PACKAGES
+
+# Set environment variables
+ENV GOPATH="/go"
+RUN export PATH="$PATH:$(go env GOPATH)/bin"
+
+# Get protobuf
+RUN go get github.com/golang/protobuf/protoc-gen-go
+RUN go get github.com/regen-network/cosmos-proto/protoc-gen-gocosmos
 
 # Set working directory for the build
 WORKDIR /go/src/github.com/cosmos/cosmos-sdk
@@ -22,23 +18,10 @@ WORKDIR /go/src/github.com/cosmos/cosmos-sdk
 # Add source files
 COPY . .
 
-# build Cosmos SDK, remove packages
-RUN make build-simd && \
-    cp ./build/simd /go/bin
-# make build-sim-linux ??
+# Build Cosmos SDK
+RUN make build-simd
 
-
-# Final image
-FROM alpine:edge
-
-# Install ca-certificates
-RUN apk add --update ca-certificates
-WORKDIR /root
-
-# Copy over binaries from the build-env
-COPY --from=build-env /go/bin/simd /usr/bin/simd
-
-EXPOSE 26656 26657 1317 9090
+EXPOSE 26658 26657
 
 # Run simd by default, omit entrypoint to ease using container with simcli
-CMD ["simd"]
+CMD ["nsd", "start"]
