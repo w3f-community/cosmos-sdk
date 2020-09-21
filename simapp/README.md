@@ -1,7 +1,6 @@
 # Building Instractions
 
 ```
-make proto-gen
 make build-simd
 ./simapp/init.sh
 ```
