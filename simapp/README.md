@@ -1,4 +1,4 @@
-# Building Instractions
+# Building Instructions
 
 ```
 make build-simd
