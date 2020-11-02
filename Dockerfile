@@ -22,5 +22,8 @@ WORKDIR /root
 # Copy over binaries from the build-env
 COPY --from=build-env /go/bin/nsd /usr/bin/nsd
 COPY --from=build-env /go/bin/nscli /usr/bin/nscli
+COPY --from=build-env /go/src/github.com/cosmos/cosmos-sdk/simapp/init.sh /usr/bin/init.sh
+
+RUN /bin/sh /usr/bin/init.sh
 
 EXPOSE 26656 26657 26658 1317 9090
